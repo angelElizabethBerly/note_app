@@ -104,11 +104,21 @@ class _NotesScreenState extends State<NotesScreen> {
                     ),
                     SizedBox(height: 10),
                     TextFormField(
+                      readOnly: true,
                       controller: dateController,
                       decoration: InputDecoration(
                           hintText: "Date",
                           filled: true,
-                          fillColor: ColorConstants.primaryGrey),
+                          fillColor: ColorConstants.primaryGrey,
+                          suffixIcon: IconButton(
+                              onPressed: () async {
+                                final selectedDate = await showDatePicker(
+                                    context: context,
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(2034));
+                                dateController.text = selectedDate.toString();
+                              },
+                              icon: Icon(Icons.calendar_month))),
                     ),
                     SizedBox(height: 15),
                     Row(
