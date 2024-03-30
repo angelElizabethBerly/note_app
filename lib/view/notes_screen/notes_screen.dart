@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:note_app/controller/notes_screen_controller.dart';
 import 'package:note_app/core/constants/color_constants.dart';
 import 'package:note_app/view/notes_screen/widgets/notes_card.dart';
@@ -116,7 +117,13 @@ class _NotesScreenState extends State<NotesScreen> {
                                     context: context,
                                     firstDate: DateTime.now(),
                                     lastDate: DateTime(2034));
-                                dateController.text = selectedDate.toString();
+                                if (selectedDate != null) {
+                                  String formattedDate = DateFormat('MMMMEEEEd')
+                                      .format(selectedDate);
+                                  dateController.text =
+                                      formattedDate.toString();
+                                }
+                                bottomSetState() {}
                               },
                               icon: Icon(Icons.calendar_month))),
                     ),
@@ -187,11 +194,15 @@ class _NotesScreenState extends State<NotesScreen> {
                                     date: dateController.text,
                                     colorIndex: selectedColorIndex);
                               } else {
-                                NotesScreenController.addNote(
-                                    title: titleController.text,
-                                    description: descriptionController.text,
-                                    date: dateController.text,
-                                    colorIndex: selectedColorIndex);
+                                if ((titleController.text != "") &&
+                                    (descriptionController.text != "") &&
+                                    (dateController.text != "")) {
+                                  NotesScreenController.addNote(
+                                      title: titleController.text,
+                                      description: descriptionController.text,
+                                      date: dateController.text,
+                                      colorIndex: selectedColorIndex);
+                                }
                               }
                               Navigator.pop(context);
                               setState(() {});
