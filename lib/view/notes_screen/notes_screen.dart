@@ -14,6 +14,12 @@ class NotesScreen extends StatefulWidget {
 }
 
 class _NotesScreenState extends State<NotesScreen> {
+  @override
+  void initState() {
+    NotesScreenController.getInitKeys();
+    super.initState();
+  }
+
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController dateController = TextEditingController();
@@ -29,33 +35,31 @@ class _NotesScreenState extends State<NotesScreen> {
         titleTextStyle: TextStyle(fontSize: 25),
       ),
       body: ListView.builder(
-          itemCount: NotesScreenController.notesList.length,
-          itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-              child: NotesCard(
-                title: NotesScreenController.notesList[index]["title"],
-                description: NotesScreenController.notesList[index]
-                    ["description"],
-                date: NotesScreenController.notesList[index]["date"],
-                selectedColorIndex: NotesScreenController.notesList[index]
-                    ["colorIndex"],
-                onDeletePressed: () {
-                  NotesScreenController.deleteNote(index);
-                  setState(() {});
-                },
-                onEditPressed: () {
-                  titleController.text =
-                      NotesScreenController.notesList[index]["title"];
-                  descriptionController.text =
-                      NotesScreenController.notesList[index]["description"];
-                  dateController.text =
-                      NotesScreenController.notesList[index]["date"];
-                  selectedColorIndex =
-                      NotesScreenController.notesList[index]["colorIndex"];
-                  customBottomSheet(
-                      context: context, isEdit: true, index: index);
-                },
-              ))),
+          itemCount: NotesScreenController.notesListKeys.length,
+          itemBuilder: (context, index) {
+            final currentKey = NotesScreenController.notesListKeys[index];
+            final currentElement = NotesScreenController.myBox.get(currentKey);
+            return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+                child: NotesCard(
+                  title: currentElement["title"],
+                  description: currentElement["description"],
+                  date: currentElement["date"],
+                  selectedColorIndex: currentElement["colorIndex"],
+                  onDeletePressed: () async {
+                    await NotesScreenController.deleteNote(currentKey);
+                    setState(() {});
+                  },
+                  onEditPressed: () {
+                    titleController.text = currentElement["title"];
+                    descriptionController.text = currentElement["description"];
+                    dateController.text = currentElement["date"];
+                    selectedColorIndex = currentElement["colorIndex"];
+                    customBottomSheet(
+                        context: context, isEdit: true, currentKey: currentKey);
+                  },
+                ));
+          }),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
             titleController.clear();
@@ -70,7 +74,7 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   Future<dynamic> customBottomSheet(
-      {required BuildContext context, bool isEdit = false, int? index}) {
+      {required BuildContext context, bool isEdit = false, var currentKey}) {
     return showModalBottomSheet(
         backgroundColor: ColorConstants.primaryBlack,
         context: context,
@@ -185,10 +189,10 @@ class _NotesScreenState extends State<NotesScreen> {
                                             BorderRadius.circular(5))),
                                 backgroundColor: MaterialStatePropertyAll(
                                     ColorConstants.primaryGrey)),
-                            onPressed: () {
+                            onPressed: () async {
                               if (isEdit == true) {
-                                NotesScreenController.editNote(
-                                    index: index!,
+                                await NotesScreenController.editNote(
+                                    key: currentKey!,
                                     title: titleController.text,
                                     description: descriptionController.text,
                                     date: dateController.text,
@@ -197,11 +201,12 @@ class _NotesScreenState extends State<NotesScreen> {
                                 if ((titleController.text != "") &&
                                     (descriptionController.text != "") &&
                                     (dateController.text != "")) {
-                                  NotesScreenController.addNote(
+                                  await NotesScreenController.addNote(
                                       title: titleController.text,
                                       description: descriptionController.text,
                                       date: dateController.text,
                                       colorIndex: selectedColorIndex);
+                                  setState(() {});
                                 }
                               }
                               Navigator.pop(context);
